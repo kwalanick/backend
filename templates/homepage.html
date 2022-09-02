@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+ <div class="container">
+      <div class="portlet portlet-boxed">
+          <div class="portlet-header">
+                      <h4 class="portlet-title">
+                          Premium Preparation Upload Facilty
+                          <div id="aimsuser" class="not-visible">{{ username }}</div>
+                      </h4>
+          </div> <!-- /.portlet-header -->
+          <div class="portlet-body">
+
+               <form action="" method="POST" id="upload_form" enctype="multipart/form-data" class="form-horizontal">
+                {% csrf_token %}
+
+                <div class="form-group">
+                        <div class="col-md-8">
+                            <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
+                        </div>
+                </div>
+
+
+                <button type="submit" class="btn btn-primary">Upload</button>
+              </form>
+              <hr/>
+              <div id="validate" class="not-visible">
+
+              </div>
+              <div id='progress-box' class="not-visible">
+              </div>
+
+              </div>
+
+
+
+              <div class="mt-5">
+                <h2 class="title is-2">Tasks</h2>
+                <br>
+                <table class='table'>
+                  <thead>
+                    <tr>
+                      <th>Task ID</th>
+                      <th>Task state</th>
+                      <th>Task percentage %</th>
+                      <th>Task info</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+               </div>
+             <br>
+             <div id="success-message" class="alert alert-success  not-visible" role="alert">
+
+             </div>
+             <hr/>
+               <ul class = "list-group">
+
+               </ul>
+             </div>
+
+
+          </div>
+
+      </div>
+
+
+
+ </div>
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+    <div class="container">
+
+          <div class="page-header">
+            <h3 class="page-title">Client Details</h3>
+            <ol class="breadcrumb">
+              <li><a href="/clients/upload_form/{{  username }}">Client Uploads - {{ batch_no }} </a></li>
+            </ol>
+          </div> <!-- /.page-header -->
+
+
+          <fieldset class="content-group">
+
+                <div class="portlet portlet-boxed ">
+
+                 <div class="portlet-header">
+                      <h4 class="portlet-title" style="{ float: right}">
+                          <a href="/">Back</a>
+                      </h4>
+                 </div> <!-- /.portlet-header -->
+
+                 <div class="portlet-body">
+                     <div style="overflow-x:auto;">
+                     <table
+                        id="vehicles"
+                        class="table"
+                        style="width:100% "
+                        border="1"
+                        >
+                        <thead>
+                        <tr>
+                            <th ># </th>
+                            <th >BNR_CLASSIFICATION </th>
+                            <th >SALUTATION</th>
+                            <th >SURNAME</th>
+                            <th >FIRST_NAME</th>
+                            <th >CLIENT_NAME</th>
+                            <th >NATIONALITY_CODE</th>
+                            <th >RESIDENCE_CODE</th>
+                            <th >ID_TYPE</th>
+                            <th >ID_NUMBER</th>
+                            <th >DATE_OF_BIRTH</th>
+                            <th >GENDER</th>
+                            <th >MARITAL_STATUS</th>
+
+                            <th >SPOUSE_NAME</th>
+                            <th >RESIDENCE_TYPE</th>
+                            <th >ADDRESS</th>
+                            <th >EMAIL</th>
+
+                            <th >TELEPHONE</th>
+                            <th >TAX</th>
+                            <th >OCCUPATION_CODE</th>
+                            <th >INDUSTRY_CODE</th>
+                            <th >ECONOMIC_SUB_SECTOR_CODE</th>
+                            <th >RELATION_TO_COMPANY</th>
+                            <th >POB_PROVINCE</th>
+                            <th >POB_DISTRICT</th>
+                            <th >POB_SECTOR</th>
+                            <th >POB_CELL</th>
+                            <th >POB_VILLAGE</th>
+                            <th >#</th>
+                        </tr>
+                        </thead>
+                         <tbody>
+                          {% for mem in clients %}
+                          <tr>
+                              <td>{{ mem.id }}</td>
+                              <td>{{ mem.bnr_classification }}</td>
+                              <td>{{ mem.salutation }}</td>
+                              <td>{{ mem.sname }}</td>
+                              <td>{{ mem.fname }}</td>
+                              <td>{{ mem.client_name }}</td>
+                              <td>{{ mem.country_code }}</td>
+                              <td>{{ mem.resident_country }}</td>
+                              <td>{{ mem.identity_type }}</td>
+                              <td>{{ mem.identity_card_no }}</td>
+                              <td>{{ mem.birth_date }}</td>
+                              <td>{{ mem.gender}}</td>
+                              <td>{{ mem.marital_status }}</td>
+
+                              <td>{{ mem.spouse_name }}</td>
+                              <td>{{ mem.residence_type }}</td>
+                              <td>{{ mem.address }}</td>
+                              <td>{{ mem.email }}</td>
+
+                              <td>{{ mem.mobile_no }}</td>
+                              <td>{{ mem.tax }}</td>
+                              <td>{{ mem.occupation_code }}</td>
+                              <td>{{ mem.naics_code  }}</td>
+                              <td>{{ mem.economic_sub_sector }}</td>
+                              <td>{{ mem.relation_to_company_code }}</td>
+                              <td>{{ mem.pob_province }}</td>
+                              <td>{{ mem.pob_district }}</td>
+                              <td>{{ mem.pob_sector }}</td>
+                              <td>{{ mem.pob_cell }}</td>
+                              <td>{{ mem.pob_village }}</td>
+
+                              <td><a href="/">(view)</a></td>
+                          </tr>
+                          {% endfor %}
+                         </tbody>
+                    </table>
+                    </div>
+
+
+
+                </div>
+
+                </div>
+
+            </fieldset>
+
+     </div>
+
+
+
+{% endblock %}

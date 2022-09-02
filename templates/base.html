@@ -1,0 +1,436 @@
+{% load static %}
+<html lang="en">
+<head>
+{#  <meta charset="UTF-8">#}
+  <meta http-equiv="X-UA-Compatible" content="IE=edge;" />
+  <link rel="stylesheet" href="{% static 'bower_components/fontawesome/css/font-awesome.min.css' %}">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+   <!-- Bower CSS -->
+  <link rel="stylesheet" href="{% static 'bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'bower_components/magnific-popup/dist/magnific-popup.css' %}">
+  <link rel="stylesheet" href="{% static 'bower_components/select2/dist/css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bower_components/select2-bootstrap-theme/dist/select2-bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bower_components/jquery-icheck/skins/minimal/_all.css' %}">
+
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="{% static 'css/mvpready-admin.css' %}">
+  <style>
+    #dataTables_Filter{
+        float: left;
+    }
+    .not-visible{
+        display: none;
+    }
+    #dataTables_filter input { width: 1000px }
+  </style>
+
+    <title>Motor Upload Form</title>
+</head>
+<body class="">
+
+   {% block content %}
+
+   {% endblock %}
+
+</div>
+
+
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+
+
+<!-- Core JS -->
+<script src="{% static 'bower_components/jquery/dist/jquery.js' %}"></script>
+<script src=".{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'bower_components/slimscroll/jquery.slimscroll.js' %}"></script>
+
+<!-- Celery JS -->
+<!--<script src="{% static 'celery_progress/celery_progress.js' %}"></script>-->
+<!--<script src="{% static 'celery_progress/websockets.js' %}"></script>-->
+
+<!-- Plugin JS -->
+<script src="{% static 'bower_components/select2/dist/js/select2.min.js' %}"></script>
+<script src="{% static 'bower_components/jquery-icheck/icheck.min.js'  %}"></script>
+<script src="{% static 'bower_components/parsleyjs/dist/parsley.js' %}"></script>
+<script src="{% static 'bower_components/bootstrap-3-timepicker/js/bootstrap-timepicker.js' %}"></script>
+<script src="{% static 'bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'bower_components/bootstrap-jasny/js/fileinput.js' %}"></script>
+<script src="{% static 'bower_components/jquery-simplecolorpicker/jquery.simplecolorpicker.js' %}"></script>
+<script src="{% static 'bower_components/magnific-popup/dist/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'global/js/demos/form-pickers.js' %}"></script>
+
+
+<!-- Datatable JS -->
+<script src="{% static 'bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.js' %}"></script>
+<script src="{% static 'bower_components/datatables-helper/js/datatables-helper.js' %}"></script>
+
+
+<!-- App JS -->
+<script src="{% static 'global/js/mvpready-core.js' %}"></script>
+<script src="{% static 'global/js/mvpready-helpers.js' %}"></script>
+<script src="{% static 'js/mvpready-admin.js' %}"></script>
+
+
+
+<!-- Demo JS -->
+<script type="application/javascript">
+        setTimeout(function () {
+            $('.list-group-item').fadeOut('slow');
+        },3000)
+ </script>
+
+<script>
+
+'use strict';
+var progressBox = document.getElementById('progress-box');
+var validate = document.getElementById('validate');
+
+$(document).ready(function () {
+  $('form').submit(function (e) {
+    e.preventDefault();
+
+    var csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+    var fileUpload = $("#csv_file").get(0);
+    var files = fileUpload.files;
+    var file_data = files[0];
+    var fd = new FormData();
+
+    fd.append('csrfmiddlewaretoken', csrf);
+    fd.append('file', file_data);
+
+
+
+    $.ajax({
+      url: '/finance/run-long-task/',
+      type: 'POST',
+      data: fd,
+      cache: false,
+      contentType: false,
+      processData: false
+    }).done(function (response) {
+      //console.log(response);
+      updateState(response.task_id);
+    }).fail(function (error) {
+      return console.log(error);
+    });
+  });
+
+  function updateState(taskID) {
+    $.ajax({
+      url: '/finance/task-status/' + taskID + '/',
+      type: 'GET'
+    }).done(function (response) {
+
+      var data = '\n                <th>' + response.task_id + '</th>\n                <td>' + response.state + '</td>\n                <td>' + response.progression + '</td>\n                <td>' + response.info + '</td>\n                ';
+
+      // Add a progress bar
+      validate.classList.remove('not-visible') ;
+      validate.innerHTML= '<p>Validating......</p>';
+      var percent = 0;
+      percent = response.progression;
+      progressBox.classList.remove('not-visible');
+      progressBox.innerHTML = "<div class=\"progress\">\n                                                    <div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + percent + "%\" aria-valuenow=\"" + percent + "\"\n                                                    aria-valuemin=\"0\" aria-valuemax=\"100\"></div>\n                                                     </div>\n                                                     <h3>" + parseInt(percent) + " % </h3> ";
+
+      var tr = $("#" + response.task_id);
+      // if the element exists, update it
+      if (tr.length) {
+        tr.html(data);
+      }
+      // otherwise, create a new row in the table
+      else {
+          var tableBody = '<tr id=\'' + response.task_id + '\'>' + data + '</tr>';
+          $('tbody').append(tableBody);
+      }
+
+
+      // task is finished
+      if (response.state == "FAILURE" || response.state == "SUCCESS" ) {
+        var errors = JSON.parse(response.errors);
+        var len = errors.length;
+        if (len > 0) {
+        for (var i = 0; i < errors.length; i++) {
+           var taskList = document.getElementsByClassName('list-group');
+           var child = document.createElement('li');
+           child.innerHTML = '<li class="list-group-item list-group-item-danger">' + errors[i] + '</li></br>';
+           taskList[0].appendChild(child);
+           document.getElementById("upload_form").reset();
+
+        }}else{
+            progressBox.classList.add('not-visible');
+            validate.classList.add('not-visible');
+
+            var username = document.getElementById('aimsuser').innerHTML;
+            upload_data(response.fin_data,username);
+            // upload the batch
+        }
+
+        return false;
+      }
+      // rerun every 2 seconds
+       updateState(response.task_id);
+    }).fail(function (error) {
+      return console.log(error);
+    });
+  }
+
+
+  function upload_data (fin_data,username){
+         $.ajax({
+                type: 'POST',
+                url: '/finance/upload_data/',
+                dataType: 'json',
+                data: {
+                     fin_data :fin_data,
+                     username: username
+                },
+                beforeSend: function () {
+                },
+                success: function (response) {
+                    console.log(response.task_id);
+                    updateBankstate(response.task_id);
+                },
+            })
+
+          }
+
+
+   function updateBankstate(taskID) {
+    $.ajax({
+      url: '/finance/task-status-new/'+ taskID +'/',
+      type: 'GET'
+      }).done(function (response) {
+      var data = '\n                <th>' + response.task_id + '</th>\n                <td>' + response.state + '</td>\n                <td>' + response.progression + '</td>\n                <td>' + response.info + '</td>\n                ';
+
+      // Add a progress bar
+      validate.classList.remove('not-visible') ;
+      validate.innerHTML= '<p>Uploading......</p>';
+      var percent = 0;
+      percent = response.progression;
+      progressBox.classList.remove('not-visible');
+      progressBox.innerHTML = "<div class=\"progress\">\n                                                    <div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + percent + "%\" aria-valuenow=\"" + percent + "\"\n                                                    aria-valuemin=\"0\" aria-valuemax=\"100\"></div>\n                                                     </div>\n                                                     <p>" + parseInt(percent) + " % </p> ";
+
+      var tr = $("#" + response.task_id);
+      // if the element exists, update it
+      if (tr.length) {
+        tr.html(data);
+      }
+      // otherwise, create a new row in the table
+      else {
+          var tableBody = '<tr id=\'' + response.task_id + '\'>' + data + '</tr>';
+          $('tbody').append(tableBody);
+      }
+      // task is finished
+      if (response.state === "FAILURE" || response.state === "SUCCESS" || response.progression === 100) {
+            document.getElementById("upload_form").reset();
+            var sucessMsg = document.getElementById('success-message');
+            sucessMsg.classList.remove('not-visible');
+            sucessMsg.innerHTML='<p>' +'You have successfully uploaded the file in AIMS with batch no  '+'<strong>'+response.batch_no+'</strong>' +'</p>';
+            return false;
+      }
+        // rerun every 2 seconds
+        updateBankstate(response.task_id);
+    }).fail(function (error) {
+        return console.log(error);
+    });
+
+  }
+
+
+
+});
+</script>
+
+<script type="application/javascript">
+
+
+
+       {% comment %} var uploadForm = document.getElementById('submit');
+        var input = document.getElementById('csv_file');
+        var submitBtn = document.getElementById('submit');
+        var progressBox = document.getElementById('progress-box');
+        var cancelBox = document.getElementById('cancel-box');
+        var cancelBtn = document.getElementById('cancel-btn');
+        var noOfrecs = document.getElementById('no_of_records');
+        var currRecs = document.getElementById('curr_record');
+        var csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+        var fileUpload = $("#csv_file").get(0);
+
+
+
+        uploadForm.addEventListener('click',function () {
+            progressBox.classList.remove('not-visible');
+        }) ;{% endcomment %}
+
+
+       {# $("#csv_file").on('change', function (e) {#}
+       {#     e.preventDefault();#}
+       {##}
+       {#     noOfrecs.classList.remove('not-visible');#}
+       {##}
+       {#     var files = fileUpload.files;#}
+       {#     var file_data = files[0];#}
+       {##}
+       {#     var fd = new FormData();#}
+       {#     fd.append('csrfmiddlewaretoken', csrf);#}
+       {#     fd.append('file', file_data);#}
+       {##}
+       {#     console.log(file_data);#}
+       {##}
+       {#     $.ajax({#}
+       {#         type: 'POST',#}
+       {#         url: '/finance/get_number_records/nndehi/',#}
+       {#         enctype: 'multipart/form-data',#}
+       {#         data: fd,#}
+       {#         beforeSend: function () {#}
+       {##}
+       {#         },#}
+       {#         xhr: function () {#}
+       {#             var xhr = new window.XMLHttpRequest();#}
+       {##}
+       {#             xhr.upload.addEventListener('progress', function (e) {#}
+       {#                 if (e.lengthComputable) {#}
+       {#                     var percent = e.loaded / e.total * 100;#}
+       {#                     console.log(percent);#}
+       {#                 }#}
+       {#             });#}
+       {##}
+       {#             return xhr#}
+       {#         },#}
+       {#         success: function (response) {#}
+       {#             console.log(response)#}
+       {#             noOfrecs.innerHTML = '<p id="num_of_recs">' + response.data + '</p>'#}
+       {#         },#}
+       {#         error: function (error) {#}
+       {#             console.log(error)#}
+       {#         },#}
+       {#         cache: false,#}
+       {#         contentType: false,#}
+       {#         processData: false#}
+       {#     })#}
+       {##}
+       {##}
+       {# });#}
+       {##}
+       {##}
+       {# $("#upload_form").on('submit', function (e) {#}
+       {#     e.preventDefault();#}
+       {##}
+       {#     progressBox.classList.remove('not-visible');#}
+       {#     cancelBox.classList.remove('not-visible');#}
+       {#     currRecs.classList.remove('not-visible');#}
+       {#     console.log('Clicked!!!!!!!');#}
+       {##}
+       {#     var files = fileUpload.files;#}
+       {#     var file_data = files[0];#}
+       {#     var fd = new FormData();#}
+       {##}
+       {#     fd.append('csrfmiddlewaretoken', csrf);#}
+       {#     fd.append('file', file_data);#}
+       {##}
+       {#     var num_of_recs = $("#num_of_recs").text();#}
+       {#     console.log(num_of_recs);#}
+       {##}
+       {#     $.ajax({#}
+       {#         type: 'POST',#}
+       {#         url: '/finance/upload_fin_csv/nndehi/',#}
+       {#         enctype: 'multipart/form-data',#}
+       {#         data: fd,#}
+       {#         beforeSend: function () {#}
+       {#         },#}
+       {#         xhr: function () {#}
+       {#             var xhr = new window.XMLHttpRequest();#}
+       {#             xhr.upload.addEventListener('progress', function (e) {#}
+       {#                 var curr_recs = $("#num_of_recs").text();#}
+       {#                 if (e.lengthComputable) {#}
+       {#                     var percent = 4 / num_of_recs * 100;#}
+       {#                     console.log(percent);#}
+       {#                      $("#progress-box").width(percent + '%');#}
+       {#                     $("#progress-box").html(percent+'%');#}
+       {#                     progressBox.innerHTML = `<div class="progress">#}
+       {#                                              <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}"#}
+       {#                                                 aria-valuemin="0" aria-valuemax="100"></div>#}
+       {#                                              </div>#}
+       {#                                              <p>${percent.toFixed(1)} % </p>`#}
+       {#                 }#}
+       {#             });#}
+       {##}
+       {#             return xhr#}
+       {#         },#}
+       {#         success: function (response) {#}
+       {#             console.log(response)#}
+       {#         },#}
+       {#         error: function (error) {#}
+       {#             console.log(error)#}
+       {#         },#}
+       {#         cache: false,#}
+       {#         contentType: false,#}
+       {#         processData: false#}
+       {#     });#}
+       {##}
+       {##}
+       {##}
+       {# });#}
+       {##}
+       {# function start_import() {#}
+       {#     $.ajax({#}
+       {#         url: '/finance/upload_fin_csv/nndehi/',#}
+       {#         success: function (data) {#}
+       {#         }#}
+       {#     })#}
+       {# }#}
+       {##}
+       {# function get_import_data() {#}
+       {#     $.ajax({#}
+       {#         url: '/finance/get_curr_record/'#}
+       {#         success: function (response) {#}
+       {#             var total_data = $("#num_of_recs").text();#}
+       {#             var width = Math.round((response.data/total_data)*100)#}
+       {#             console.log(width)#}
+       {#         }#}
+       {#     })#}
+       {# }#}
+       {##}
+       {#function get_curr (){#}
+       {#         $.ajax({#}
+       {#         type: 'GET',#}
+       {#         url: '/finance/get_curr_record/',#}
+       {#         dataType: 'json',#}
+       {#         beforeSend: function () {#}
+       {#         },#}
+       {#         success: function (response) {#}
+       {#             console.log(response);#}
+       {#             currRecs.innerHTML = '<p id="curr_recs">' + response.data + '</p>'#}
+       {#         },#}
+       {#         cache: false,#}
+       {#         contentType: false,#}
+       {#         processData: false#}
+       {#     })#}
+       {##}
+       {##}
+       {#     }}#}
+
+
+
+
+      $(document).ready(function() {
+          $('#batches').DataTable(
+              {
+                    "order": [[ 3, "desc" ]]
+              }
+          );
+          $("#vehicles").DataTable()
+
+      });
+
+
+
+  </script>
+
+
+</body>
+</html>

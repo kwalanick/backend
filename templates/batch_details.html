@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+    <div class="container">
+
+          <div class="page-header">
+            <h3 class="page-title">Member Details</h3>
+            <ol class="breadcrumb">
+              <li><a href="/uploads/upload_form/{{  username }}">Uploads</a></li>
+              <li><a href="#">{{ batch_no }}</a></li>
+              <li class="active">#</li>
+            </ol>
+          </div> <!-- /.page-header -->
+
+
+          <fieldset class="content-group">
+
+                <div class="portlet portlet-boxed ">
+
+                 <div class="portlet-header">
+                      <h4 class="portlet-title" style="{ float: right}">
+                          <a href="/">Back</a>
+                      </h4>
+                 </div> <!-- /.portlet-header -->
+
+                 <div class="portlet-body">
+                     <div style="overflow-x:auto;">
+                     <table
+                        id="vehicles"
+                        class="table"
+                        style="width:100% "
+                        border="1"
+                        >
+                        <thead>
+                        <tr>
+                            <th ># </th>
+                            <th >Policy_No </th>
+                            <th >Id_Number</th>
+                            <th >First_Name</th>
+                            <th >Last_Name</th>
+                            <th >Full_Names</th>
+                            <th >Date_of_Birth</th>
+                            <th >Age</th>
+                            <th >Monthly_Salary</th>
+                            <th >Annual_Salary</th>
+                            <th >Death_Sum</th>
+                            <th >Partial_Sum</th>
+                            <th >Loss_Sum</th>
+
+                            <th >Dread_disease_sum</th>
+                            <th >Fun_fees_staff_sum</th>
+                            <th >Fun_fees_legal_sum</th>
+                            <th >Medical_sum</th>
+
+                            <th >Death_prem</th>
+                            <th >Partial_prem</th>
+                            <th >Loss_of_income_prem</th>
+                            <th >Dread_diseases_prem</th>
+                            <th >Fun_fees_staff_prem</th>
+                            <th >Fun_fees_legal_prem</th>
+                            <th >Medical_prem</th>
+                            <th >Total_premium</th>
+                            <th >#</th>
+                        </tr>
+                        </thead>
+                         <tbody>
+                          {% for mem in members %}
+                          <tr>
+                              <td>{{ forloop.counter }}</td>
+                              <td>{{ mem.policy_no }}</td>
+                              <td>{{ mem.id_number }}</td>
+                              <td>{{ mem.fname }}</td>
+                              <td>{{ mem.lname }}</td>
+                              <td>{{ mem.full_name }}</td>
+                              <td>{{ mem.date_of_birth }}</td>
+                              <td>{{ mem.age }}</td>
+                              <td>{{ mem.monthly_sal }}</td>
+                              <td>{{ mem.annual_sal }}</td>
+                              <td>{{ mem.death_sum }}</td>
+                              <td>{{ mem.partial_sum }}</td>
+                              <td>{{ mem.loss_income_sum }}</td>
+
+
+                              <td>{{ mem.dread_disease_sum }}</td>
+                              <td>{{ mem.fun_fees_staff_sum }}</td>
+                              <td>{{ mem.fun_fees_legal_sum }}</td>
+                              <td>{{ mem.medical_sum }}</td>
+
+
+                              <td>{{ mem.death_prem }}</td>
+                              <td>{{ mem.partial_prem }}</td>
+                              <td>{{ mem.loss_of_income_prem }}</td>
+                              <td>{{ mem.dread_diseases_prem }}</td>
+                              <td>{{ mem.fun_fees_staff_prem }}</td>
+                              <td>{{ mem.fun_fees_legal_prem }}</td>
+                              <td>{{ mem.medical_prem }}</td>
+                              <td>{{ mem.total_premium }}</td>
+
+
+                              <td><a href="/">(view)</a></td>
+                          </tr>
+                          {% endfor %}
+                         </tbody>
+                    </table>
+                    </div>
+
+
+
+                </div>
+
+                </div>
+
+            </fieldset>
+
+     </div>
+
+
+
+{% endblock %}
